@@ -432,11 +432,11 @@ public class Main {
         static Mission parse(String string) {
             String[] splitted = string.split("\t");
             Mission mission = new Mission(splitted[0]);
-            mission.stages = Stream
+            mission.stages = new ArrayList<>(Stream
                     .of(splitted[1].split("_"))
                     .map(stage -> Stream.of(stage.split("-")).map(Integer::parseInt).toArray(Integer[]::new))
                     .map(array -> new Stage(array[0], array[1], array[2], array[3]))
-                    .toList();
+                    .toList());
             return mission;
         }
         static Mission defaultMission() {
