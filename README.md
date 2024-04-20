@@ -21,9 +21,21 @@ This application only uses those key below:
 - Escape
 - Enter
 
+## How to use
+
+```
+curl https://raw.githubusercontent.com/PlusLake/kantai-collection-mulithread-mission/master/Main.java \
+    -w "Main.main(null);\n while(true) Thread.sleep(1000);" \
+    | jshell -
+```
+
 ## Environment Variables
 
 | Key                                             | Default Value when empty                                                                           | Description                    |
 | ----------------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------ |
 | PLUSLAKE_KANTAI_COLLECTION_WORKDIR              | ~/.pluslake/kankore/multithread/                                                                   | Home directory of this program |
 | PLUSLAKE_KANTAI_COLLECTION_MISSION_DOWNLOAD_URL | https://raw.githubusercontent.com/PlusLake/kantai-collection-mulithread-mission/master/mission.tsv | Download link of mission data  |
+
+## Memo
+
+- Data will be saved when the Window is closed. (Force killing the Window will causes data lost)
