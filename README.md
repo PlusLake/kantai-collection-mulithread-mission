@@ -39,3 +39,18 @@ curl https://raw.githubusercontent.com/PlusLake/kantai-collection-mulithread-mis
 ## Memo
 
 - Data will be saved when the Window is closed. (Force killing the Window will causes data lost)
+
+
+Execute this JavaScript at the wiki page to get the TSV data.
+https://wikiwiki.jp/kancolle/%E4%BB%BB%E5%8B%99
+
+```
+let result = [...document.querySelectorAll("td")]
+    .filter(td => td.innerText.startsWith("B"))
+    .map(td => [td, td.nextSibling, td.nextSibling.nextSibling])
+    .map(tds => tds.map(td => td.innerText.replaceAll("\n", "\\n")))
+    .map(tds => { console.log(tds[2]); return tds })
+    .map(tds => tds.join("\t"))
+    .join("\n");
+console.log(result);
+```
