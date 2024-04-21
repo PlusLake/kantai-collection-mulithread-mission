@@ -173,9 +173,10 @@ public class Main {
         final int[] cursor = controller.cursor;
         final List<Mission> missions = controller.missions;
         if (event.getID() == KeyEvent.KEY_PRESSED && controller.isEditingStage) {
-            if (KEY_CODE >= KeyEvent.VK_NUMPAD1 && KEY_CODE <= KeyEvent.VK_NUMPAD9) {
+            if (KEY_CODE >= KeyEvent.VK_NUMPAD1 && KEY_CODE <= KeyEvent.VK_NUMPAD9)
                 controller.editStageSecond(KEY_CODE - 96);
-            }
+            if (KEY_CODE >= KeyEvent.VK_1 && KEY_CODE <= KeyEvent.VK_9)
+                controller.editStageSecond(KEY_CODE - KeyEvent.VK_0);
             return;
         }
         if (event.getID() == KeyEvent.KEY_PRESSED && event.isControlDown()) {
@@ -185,6 +186,9 @@ public class Main {
             }
             if ((KEY_CODE == KeyEvent.VK_ADD || KEY_CODE == KeyEvent.VK_SUBTRACT) && cursor[1] == 2 && !controller.isStageClearMode) {
                 controller.currentStage().count += 108 - KEY_CODE;
+            }
+            if ((KEY_CODE == KeyEvent.VK_PAGE_UP || KEY_CODE == KeyEvent.VK_PAGE_DOWN) && cursor[1] == 2 && !controller.isStageClearMode) {
+                controller.currentStage().count -= (KEY_CODE - 33) * 2 - 1;
             }
         }
         if (event.getID() == KeyEvent.KEY_PRESSED && !event.isControlDown() && controller.isStageClearMode) {
@@ -196,14 +200,17 @@ public class Main {
             if (KEY_CODE == KeyEvent.VK_ADD || KEY_CODE == KeyEvent.VK_SUBTRACT) {
                 controller.clearStage(108 - KEY_CODE);
             }
+            if (KEY_CODE == KeyEvent.VK_PAGE_UP || KEY_CODE == KeyEvent.VK_PAGE_DOWN) {
+                controller.clearStage(-((KEY_CODE - 33) * 2 - 1));
+            }
         }
         if (event.getID() == KeyEvent.KEY_PRESSED && !event.isControlDown() && !controller.isStageClearMode) {
-            if (KEY_CODE == KeyEvent.VK_ADD) {
+            if (KEY_CODE == KeyEvent.VK_ADD || KEY_CODE == KeyEvent.VK_PAGE_UP) {
                 if (cursor[1] == 0) missions.add(Mission.defaultMission());
                 if (cursor[1] == 1) missions.get(cursor[0]).stages.add(new Stage(1, 1, 0, 1));
                 if (cursor[1] == 2) missions.get(cursor[0]).stages.get(cursor[2]).total++;
             }
-            if (KEY_CODE == KeyEvent.VK_SUBTRACT) {
+            if (KEY_CODE == KeyEvent.VK_SUBTRACT || KEY_CODE == KeyEvent.VK_PAGE_DOWN) {
                 if (cursor[1] == 0) missions.remove(cursor[0]);
                 if (cursor[1] == 1) {
                     missions.get(cursor[0]).removeStage(cursor[2]);
@@ -237,6 +244,10 @@ public class Main {
             if (KEY_CODE >= KeyEvent.VK_NUMPAD1 && KEY_CODE <= KeyEvent.VK_NUMPAD9 && cursor[1] == 1) {
                 controller.isEditingStage = true;
                 controller.editStageFirst(KEY_CODE - 96);
+            }
+            if (KEY_CODE >= KeyEvent.VK_1 && KEY_CODE <= KeyEvent.VK_9 && cursor[1] == 1) {
+                controller.isEditingStage = true;
+                controller.editStageFirst(KEY_CODE - KeyEvent.VK_0);
             }
             if (KEY_CODE == KeyEvent.VK_ENTER && cursor[1] == 0) {
                 JFrame frame = (JFrame) event.getSource();
