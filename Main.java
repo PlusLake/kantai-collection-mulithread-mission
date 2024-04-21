@@ -18,6 +18,17 @@ import java.util.regex.*;
 import java.util.stream.*;
 
 public class Main {
+
+    private static int clamp(int value, int min, int max) {
+        if (value < min) {
+            return min;
+        }
+        if (value > max) {
+            return max;
+        }
+        return value;
+    }
+
     public static void main(String[] args) {
         Controller controller = new Controller();
         setup(controller);
@@ -37,6 +48,7 @@ public class Main {
                 .ofNullable(System.getenv("PLUSLAKE_KANTAI_COLLECTION_MISSION_DOWNLOAD_URL"))
                 .orElse("https://raw.githubusercontent.com/PlusLake/kantai-collection-mulithread-mission/master/mission.tsv");
         final String missionLocalPath = workdir + "mission.tsv";
+        Main.wrapException(() -> Files.createDirectories(Paths.get(workdir)));
         controller.wiki = getWiki(workdir, missionDownloadPath, missionLocalPath);
         controller.savePath = workdir + "save.tsv";
         wrapException(() -> new File(controller.savePath).createNewFile());
@@ -205,6 +217,8 @@ public class Main {
                 if (cursor[1] == 0) missions.add(Mission.defaultMission());
                 if (cursor[1] == 1) missions.get(cursor[0]).stages.add(new Stage(1, 1, 0, 1));
                 if (cursor[1] == 2) missions.get(cursor[0]).stages.get(cursor[2]).total++;
+                cursor[0] = missions.size() - 1;
+                cursor[1] = cursor[2] = 0;
             }
             if (KEY_CODE == KeyEvent.VK_SUBTRACT || KEY_CODE == KeyEvent.VK_PAGE_DOWN) {
                 if (cursor[1] == 0) missions.remove(cursor[0]);
@@ -217,7 +231,7 @@ public class Main {
                 if (cursor[0] >= missions.size()) cursor[0] = missions.size() - 1;
             }
             if (KEY_CODE == KeyEvent.VK_LEFT || KEY_CODE == KeyEvent.VK_RIGHT) {
-                cursor[1] = Math.clamp(cursor[1] + KEY_CODE - 38, 0, 2);
+                cursor[1] = Main.clamp(cursor[1] + KEY_CODE - 38, 0, 2);
                 if (cursor[1] == 0) {
                     cursor[2] = 0;
                 }
@@ -276,7 +290,7 @@ public class Main {
                     return wikis
                             .stream()
                             .filter(wiki -> !text.isEmpty())
-                            .filter(wiki -> wiki.name.contains(text))
+                            .filter(wiki -> wiki.name.contains(text) || wiki.code.toLowerCase().contains(text.toLowerCase()))
                             .toList();
                 }).thenAccept(wikis -> {
                     dialog.repaint();
@@ -284,7 +298,7 @@ public class Main {
                     cursor.set(-1);
                     if (!wikis.isEmpty()) {
                         cursor.set(0);
-                        textPane.setText(wikis.getFirst().content);
+                        textPane.setText(wikis.get(0).content);
                     }
                 });
             }
@@ -304,7 +318,7 @@ public class Main {
                 }
                 if (keyCode == KeyEvent.VK_UP || keyCode == KeyEvent.VK_DOWN) {
                     if (filtered.isEmpty()) return;
-                    cursor.set(Math.clamp(cursor.get() - 39 + keyCode, 0, filtered.size() - 1));
+                    cursor.set(Main.clamp(cursor.get() - 39 + keyCode, 0, filtered.size() - 1));
                     textPane.setText(filtered.get(cursor.get()).content);
                 }
                 dialog.repaint();
