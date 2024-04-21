@@ -68,10 +68,6 @@ public class Main {
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.addKeyListener(new KeyAdapter() {
-            public void keyTyped(KeyEvent event) {
-                keyHandler.accept(event);
-                frame.repaint();
-            }
             public void keyPressed(KeyEvent event) {
                 keyHandler.accept(event);
                 frame.repaint();
@@ -172,14 +168,14 @@ public class Main {
         final int KEY_CODE = event.getKeyCode();
         final int[] cursor = controller.cursor;
         final List<Mission> missions = controller.missions;
-        if (event.getID() == KeyEvent.KEY_PRESSED && controller.isEditingStage) {
+        if (controller.isEditingStage) {
             if (KEY_CODE >= KeyEvent.VK_NUMPAD1 && KEY_CODE <= KeyEvent.VK_NUMPAD9)
                 controller.editStageSecond(KEY_CODE - 96);
             if (KEY_CODE >= KeyEvent.VK_1 && KEY_CODE <= KeyEvent.VK_9)
                 controller.editStageSecond(KEY_CODE - KeyEvent.VK_0);
             return;
         }
-        if (event.getID() == KeyEvent.KEY_PRESSED && event.isControlDown()) {
+        if (event.isControlDown()) {
             if (KEY_CODE == KeyEvent.VK_DOWN || KEY_CODE == KeyEvent.VK_UP) {
                 controller.isStageClearMode = KEY_CODE > 39;
                 controller.selectedStage = 0;
@@ -191,7 +187,7 @@ public class Main {
                 controller.currentStage().count -= (KEY_CODE - 33) * 2 - 1;
             }
         }
-        if (event.getID() == KeyEvent.KEY_PRESSED && !event.isControlDown() && controller.isStageClearMode) {
+        if (!event.isControlDown() && controller.isStageClearMode) {
             final int stagesSize = controller.stages().size();
             if (KEY_CODE == KeyEvent.VK_UP || KEY_CODE == KeyEvent.VK_DOWN) {
                 controller.selectedStage += KEY_CODE - 39;
@@ -204,7 +200,7 @@ public class Main {
                 controller.clearStage(-((KEY_CODE - 33) * 2 - 1));
             }
         }
-        if (event.getID() == KeyEvent.KEY_PRESSED && !event.isControlDown() && !controller.isStageClearMode) {
+        if (!event.isControlDown() && !controller.isStageClearMode) {
             if (KEY_CODE == KeyEvent.VK_ADD || KEY_CODE == KeyEvent.VK_PAGE_UP) {
                 if (cursor[1] == 0) missions.add(Mission.defaultMission());
                 if (cursor[1] == 1) missions.get(cursor[0]).stages.add(new Stage(1, 1, 0, 1));
@@ -256,6 +252,9 @@ public class Main {
                     Mission mission = controller.currentMission();
                     mission.name = wiki.name;
                     mission.stages = new ArrayList<>(stages);
+                    if (mission.stages.isEmpty()) {
+                        mission.stages.add(new Stage(1, 1));
+                    }
                 });
             }
         }
