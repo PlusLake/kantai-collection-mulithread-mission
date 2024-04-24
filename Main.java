@@ -110,6 +110,7 @@ public class Main {
         final int BOTTOM_HEIGHT = 200;
         final Color BACKGROUND_COLOR = new Color(255, 192, 192);
         final Color CARD_BACKGROUND_COLOR = new Color(255, 240, 240);
+        final Color CARD_BACKGROUND_CLEARED_COLOR = new Color(224, 255, 224);
         final Color BOTTOM_BACKGROUND_COLOR = new Color(255, 160, 160);
         final Color FONT_COLOR = new Color(32, 32, 32);
         final Color HIGHLIGHT = new Color(255, 64, 64);
@@ -124,7 +125,7 @@ public class Main {
             final int STAGES = mission.stages.size();
             final int TOTAL_HEIGHT = STAGES * STAGE_HEIGHT + (STAGES - 1) * MARGIN;
             final boolean isCurrentMission = !controller.isStageClearMode && controller.missions.indexOf(mission) == controller.cursor[0];
-            graphics.setColor(CARD_BACKGROUND_COLOR);
+            graphics.setColor(mission.isCleared() ? CARD_BACKGROUND_CLEARED_COLOR : CARD_BACKGROUND_COLOR);
             graphics.fillRect(0, 0, MISSION_WIDTH, TOTAL_HEIGHT);
             if (isCurrentMission && controller.cursor[1] == 0) {
                 graphics.setColor(HIGHLIGHT);
@@ -449,6 +450,9 @@ public class Main {
         void removeStage(int index) {
             if (stages.size() > 1) stages.remove(index);
         }
+        boolean isCleared() {
+            return stages.stream().allMatch(Stage::isCleared);
+        }
         static Mission parse(String string) {
             String[] splitted = string.split("\t");
             Mission mission = new Mission(splitted[0]);
@@ -539,6 +543,9 @@ public class Main {
         }
         void minusTotal() {
             total = Math.max(--total, 1);
+        }
+        boolean isCleared() {
+            return count >= total;
         }
         public String toString() {
             return "%d-%d-%d-%d".formatted(first, second, count, total);
