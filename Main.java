@@ -211,11 +211,16 @@ public class Main {
         }
         if (!event.isControlDown() && !controller.isStageClearMode) {
             if (KEY_CODE == KeyEvent.VK_ADD || KEY_CODE == KeyEvent.VK_PAGE_UP) {
-                if (cursor[1] == 0) missions.add(Mission.defaultMission());
-                if (cursor[1] == 1) missions.get(cursor[0]).stages.add(new Stage(1, 1, 0, 1));
+                if (cursor[1] == 0) {
+                    missions.add(Mission.defaultMission());
+                    cursor[0] = missions.size() - 1;
+                    cursor[1] = cursor[2] = 0;
+                }
+                if (cursor[1] == 1) {
+                    missions.get(cursor[0]).stages.add(new Stage(1, 1, 0, 1));
+                    cursor[1] = cursor[2] = missions.get(cursor[0]).stages.size() - 1;
+                }
                 if (cursor[1] == 2) missions.get(cursor[0]).stages.get(cursor[2]).total++;
-                cursor[0] = missions.size() - 1;
-                cursor[1] = cursor[2] = 0;
             }
             if (KEY_CODE == KeyEvent.VK_SUBTRACT || KEY_CODE == KeyEvent.VK_PAGE_DOWN) {
                 if (cursor[1] == 0) missions.remove(cursor[0]);
