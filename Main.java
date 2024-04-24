@@ -20,12 +20,8 @@ import java.util.stream.*;
 public class Main {
 
     private static int clamp(int value, int min, int max) {
-        if (value < min) {
-            return min;
-        }
-        if (value > max) {
-            return max;
-        }
+        if (value < min) return min;
+        if (value > max) return max;
         return value;
     }
 
@@ -479,7 +475,10 @@ public class Main {
         List<int[]> stages = new ArrayList<>();
 
         public String toString() {
-            String stageString = stages.stream().map(stage -> "%d-%d".formatted(stage[0], stage[1])).collect(Collectors.joining(", "));
+            String stageString = stages
+                    .stream()
+                    .map(stage -> "%d-%d".formatted(stage[0], stage[1]))
+                    .collect(Collectors.joining(", "));
             return "[%s] %s (%s)".formatted(code, name, stageString);
         }
 
