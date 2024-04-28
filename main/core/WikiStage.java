@@ -20,7 +20,7 @@ public class WikiStage {
     private String victory;
 
     public int[] toOldWikiStage() {
-        return this.stage !=0 ? new int[] {this.region, this.area, this.stage} : new int[] {this.region, this.area};
+        return this.stage != 0 ? new int[] {this.region, this.area, this.stage} : new int[] {this.region, this.area};
     }
 
     public static List<WikiStage> parse(String description) {
