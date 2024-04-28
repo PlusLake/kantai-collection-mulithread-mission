@@ -50,7 +50,7 @@ public class Dialog {
             filteredWikis.set(searchResult);
             cursor = -1;
             if (!searchResult.isEmpty()) {
-                detail.setText(searchResult.get(0).getContent());
+                detail.setText(searchResult.get(0).getDescription());
                 cursor = 0;
             }
             dialog.repaint();
@@ -85,7 +85,7 @@ public class Dialog {
                 String text = Exceptions
                         .wrap(() -> document.getText(0, document.getLength()))
                         .toLowerCase();
-                Predicate<Wiki> grepCode = wiki -> wiki.getCode().toLowerCase().contains(text);
+                Predicate<Wiki> grepCode = wiki -> wiki.getId().toLowerCase().contains(text);
                 Predicate<Wiki> grepName = wiki -> wiki.getName().contains(text);
                 CompletableFuture
                         .supplyAsync(() -> wikis
@@ -143,7 +143,7 @@ public class Dialog {
         if (wikis.isEmpty()) return;
         cursor += difference;
         cursor = Math.floorMod(cursor, wikis.size());
-        detail.setText(filteredWikis.get().get(cursor).getContent());
+        detail.setText(filteredWikis.get().get(cursor).getDescription());
     }
 
     private void render(Graphics2D graphics, List<Wiki> wikis) {
@@ -165,7 +165,7 @@ public class Dialog {
             if (currentRow.getAndIncrement() == flooredCursor) {
                 graphics.fillOval(4, ROW_HEIGHT / 2 - CURSOR_RADIUS, CURSOR_RADIUS, CURSOR_RADIUS);
             }
-            graphics.drawString(wiki.getCode(), 18, LINE_POSITION);
+            graphics.drawString(wiki.getId(), 18, LINE_POSITION);
             graphics.drawString(wiki.getName(), 60, LINE_POSITION);
             graphics.translate(0, ROW_HEIGHT);
         });
