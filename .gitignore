@@ -3,3 +3,5 @@
 *.jar
 out
 target
+*.diff
+*.log

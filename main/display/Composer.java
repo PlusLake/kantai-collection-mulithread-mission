@@ -212,7 +212,7 @@ public class Composer {
             Dialog.show(frame, wikis).ifPresent(wiki -> {
                 Mission mission = currentMission();
                 mission.setName(wiki.getName());
-                mission.replaceStages(wiki.getStages().stream().map(array -> Stage.of(array[0], array[1])).toList());
+                mission.replaceStages(wiki.getOldStages().stream().map(array -> Stage.of(array[0], array[1])).toList());
             });
         }
     }
