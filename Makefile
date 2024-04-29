@@ -6,3 +6,6 @@ main:
 	echo "Main-Class: main.Main" > target/manifest
 	jar -uvfm kancolle-multi.jar target/manifest
 	java -jar kancolle-multi.jar
+
+run:
+	java -jar kancolle-multi.jar

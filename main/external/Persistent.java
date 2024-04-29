@@ -13,7 +13,7 @@ public class Persistent {
             .of("PLUSLAKE_KANTAI_COLLECTION_WORKDIR")
             .map(System::getenv)
             .orElse(System.getProperty("user.home") + "/.pluslake/kankore/multithread/");
-    private static final String WIKI_LOCAL_PATH = WORK_DIRECTORY + "mission.tsv";
+    private static final String WIKI_LOCAL_PATH = WORK_DIRECTORY + "wiki.tsv";
     public static final String SAVE_PATH = WORK_DIRECTORY + "save.tsv";
 
     static {
@@ -35,10 +35,19 @@ public class Persistent {
     }
 
     public static List<Wiki> loadWikis() {
-        if (!Files.exists(Path.of(WIKI_LOCAL_PATH))) Download.wiki(WIKI_LOCAL_PATH);
+        if (!Files.exists(Path.of(WIKI_LOCAL_PATH))) saveWikis();
         return Exceptions.wrap(() -> Files
                 .lines(Path.of(WIKI_LOCAL_PATH))
                 .map(Wiki::parse)
                 .toList());
+    }
+
+    private static void saveWikis() {
+        Stream<String> stream = WikiParser
+                .parsePage(Download.wiki())
+                .stream()
+                .map(Wiki::toString);
+        Iterable<String> iterable = stream::iterator;
+        Exceptions.wrap(() -> Files.write(Path.of(WIKI_LOCAL_PATH), iterable));
     }
 }

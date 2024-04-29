@@ -9,6 +9,7 @@ import java.awt.geom.*;
 import java.util.*;
 import java.util.List;
 import java.util.function.*;
+import java.util.stream.IntStream;
 
 import static java.awt.event.KeyEvent.*;
 
@@ -49,7 +50,6 @@ public class Composer {
         clear(graphics, size);
         transform(graphics, new Point(PANEL_PADDING, PANEL_PADDING), () -> renderMissions(graphics));
         transform(graphics, new Point(0, size.height - FOOTER_HEIGHT), () -> renderFooter(graphics, size.width));
-
         if (currentMode == Mode.STAGE_EDIT) {
             graphics.setColor(new Color(0, 0, 0, 128));
             Area area = new Area(new Rectangle(size));
@@ -212,7 +212,7 @@ public class Composer {
             Dialog.show(frame, wikis).ifPresent(wiki -> {
                 Mission mission = currentMission();
                 mission.setName(wiki.getName());
-                mission.replaceStages(wiki.getOldStages().stream().map(array -> Stage.of(array[0], array[1])).toList());
+                mission.replaceStages(wiki.getOldStages().stream().map(array -> Stage.of(array[0], array[1], array[2])).toList());
             });
         }
     }

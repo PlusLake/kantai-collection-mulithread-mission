@@ -1,17 +1,14 @@
 package main.core;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.*;
+import java.util.regex.*;
 
 public class WikiStage {
 
     private static final Pattern STAGE_PATTERN = Pattern.compile("\\((?<Region>\\d)-(?<Area>\\d)(?:-(?<Stage>\\d))?/?(?<Requirement>[^)]+?)?\\)");
     private static final Pattern COUNT_PATTERN = Pattern.compile("(?<Count>//d+)回");
     private static final Pattern VICTORY_PATTERN = Pattern.compile("回(?<Victory>\\w)?勝利");
-    
+
     private int region;
     private int area;
     private int stage;
@@ -20,7 +17,7 @@ public class WikiStage {
     private String victory;
 
     public int[] toOldWikiStage() {
-        return this.stage != 0 ? new int[] {this.region, this.area, this.stage} : new int[] {this.region, this.area};
+        return new int[] {this.region, this.area, this.stage};
     }
 
     public static List<WikiStage> parse(String description) {

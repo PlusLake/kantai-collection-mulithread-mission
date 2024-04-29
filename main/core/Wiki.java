@@ -1,12 +1,10 @@
 package main.core;
 
 import java.util.*;
-import java.util.regex.*;
+import java.util.stream.*;
 
 public class Wiki {
-
     private String id;
-    private List<String> aliases = new ArrayList<>();
     private String name;
     private String description;
     private int fuel;
@@ -16,22 +14,41 @@ public class Wiki {
     private String bonus;
     private List<int[]> oldStages = new ArrayList<>();
     private List<WikiStage> stages = new ArrayList<>();
+    private List<String> aliases = new ArrayList<>();
+
+    public String toString() {
+        return Stream
+                .of(id, name, description, fuel, bullet, steel, bauxite, bonus)
+                .map(String::valueOf)
+                .map(string -> string.replaceAll("\n", "\\\\n"))
+                .collect(Collectors.joining("\t"));
+    }
 
     public static Wiki parse(String string) {
         String[] array = string.split("\t");
-        if (array.length != 3) {
-            String message = "Invalid tsv file. Column count not 3 (%d)".formatted(array.length);
-            throw new IllegalArgumentException(message);
+        int columnCount = 8;
+        if (array.length != columnCount) {
+            String message = "Invalid tsv file. Column count not %d (%d) (%s)";
+            throw new IllegalArgumentException(message.formatted(columnCount, array.length, string));
         }
-        Wiki mission = new Wiki();
-        mission.id = array[0];
-        mission.name = array[1];
-        mission.description = array[2].replaceAll("\\\\n", "\n");
-        mission.oldStages = findStagesFromText(array[2]);
-        return mission;
+        Wiki wiki = new Wiki();
+        wiki.id = array[0];
+        wiki.name = array[1];
+        wiki.description = array[2].replaceAll("\\\\n", "\n");
+        wiki.fuel = Integer.parseInt(array[3]);
+        wiki.bullet = Integer.parseInt(array[4]);
+        wiki.steel = Integer.parseInt(array[5]);
+        wiki.bauxite = Integer.parseInt(array[6]);
+        wiki.bonus = array[7].replaceAll("\\\\n", "\n");;
+        wiki.oldStages = WikiStage
+                .parse(wiki.description)
+                .stream()
+                .map(WikiStage::toOldWikiStage)
+                .toList();
+        return wiki;
     }
 
-    public static Wiki parseAdvanced(List<String> cells) {
+    public static Wiki parseFromWikiTableCells(List<String> cells) {
         Wiki wiki = new Wiki();
         Deque<String> candidates = new LinkedList<>(List.of(cells.get(0).split(System.lineSeparator(), -1)));
         wiki.id = candidates.poll();
@@ -54,20 +71,6 @@ public class Wiki {
         wiki.stages.addAll(WikiStage.parse(wiki.description));
         wiki.oldStages.addAll(wiki.stages.stream().map(WikiStage::toOldWikiStage).toList());
         return wiki;
-    }
-
-    private static List<int[]> findStagesFromText(String string) {
-        Matcher matcher = Pattern.compile("(\\([1-9]-[1-9][^)]*\\))").matcher(string);
-        List<int[]> result = new ArrayList<>();
-        while (matcher.find()) {
-            for (int i = 0; i < matcher.groupCount(); i++) {
-                result.add(new int[] {
-                        matcher.group(i).charAt(1) - '0',
-                        matcher.group(i).charAt(3) - '0'
-                });
-            }
-        }
-        return result;
     }
 
     public String getId() { return id; }

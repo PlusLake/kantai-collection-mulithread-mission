@@ -38,10 +38,16 @@ public class Stage {
     public void addTotal() { total++; }
     public void minusTotal() { total = Math.max(--total, 1); }
 
+    public static Stage of(int first, int second, int extra, int count, int total) {
+        return new Stage(first, second, extra, count, total);
+    }
     public static Stage of(int first, int second, int count, int total) {
         return new Stage(first, second, 0, count, total);
     }
     public static Stage of(int first, int second) {
         return new Stage(first, second, 0, 0, 1);
+    }
+    public static Stage of(int first, int second, int extra) {
+        return new Stage(first, second, extra, 0, 1);
     }
 }
