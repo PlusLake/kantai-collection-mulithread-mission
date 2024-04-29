@@ -211,8 +211,8 @@ public class Composer {
         if (keyCode == VK_ENTER) {
             Dialog.show(frame, wikis).ifPresent(wiki -> {
                 Mission mission = currentMission();
-                mission.setName(wiki.getName());
-                mission.replaceStages(wiki.getOldStages().stream().map(array -> Stage.of(array[0], array[1], array[2])).toList());
+                mission.setName(wiki.name());
+                mission.replaceStages(wiki.oldStages().stream().map(array -> Stage.of(array[0], array[1], array[2])).toList());
             });
         }
     }

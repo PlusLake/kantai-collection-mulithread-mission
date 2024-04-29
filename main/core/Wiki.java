@@ -3,19 +3,19 @@ package main.core;
 import java.util.*;
 import java.util.stream.*;
 
-public class Wiki {
-    private String id;
-    private String name;
-    private String description;
-    private int fuel;
-    private int bullet;
-    private int steel;
-    private int bauxite;
-    private String bonus;
-    private List<int[]> oldStages = new ArrayList<>();
-    private List<WikiStage> stages = new ArrayList<>();
-    private List<String> aliases = new ArrayList<>();
-
+public record Wiki(
+        String id,
+        String name,
+        String description,
+        int fuel,
+        int bullet,
+        int steel,
+        int bauxite,
+        String bonus,
+        List<int[]> oldStages,
+        List<WikiStage> stages,
+        List<String> aliases
+) {
     public String toString() {
         return Stream
                 .of(id, name, description, fuel, bullet, steel, bauxite, bonus)
@@ -31,56 +31,51 @@ public class Wiki {
             String message = "Invalid tsv file. Column count not %d (%d) (%s)";
             throw new IllegalArgumentException(message.formatted(columnCount, array.length, string));
         }
-        Wiki wiki = new Wiki();
-        wiki.id = array[0];
-        wiki.name = array[1];
-        wiki.description = array[2].replaceAll("\\\\n", "\n");
-        wiki.fuel = Integer.parseInt(array[3]);
-        wiki.bullet = Integer.parseInt(array[4]);
-        wiki.steel = Integer.parseInt(array[5]);
-        wiki.bauxite = Integer.parseInt(array[6]);
-        wiki.bonus = array[7].replaceAll("\\\\n", "\n");;
-        wiki.oldStages = WikiStage
-                .parse(wiki.description)
-                .stream()
-                .map(WikiStage::toOldWikiStage)
-                .toList();
-        return wiki;
+        return new Wiki(
+                array[0],
+                array[1],
+                array[2].replaceAll("\\\\n", "\n"),
+                Integer.parseInt(array[3]),
+                Integer.parseInt(array[4]),
+                Integer.parseInt(array[5]),
+                Integer.parseInt(array[6]),
+                array[7].replaceAll("\\\\n", "\n"),
+                WikiStage
+                        .parse(array[2].replaceAll("\\\\n", "\n"))
+                        .stream()
+                        .map(WikiStage::toOldWikiStage)
+                        .toList(),
+                new ArrayList<>(),
+                new ArrayList<>()
+        );
     }
 
     public static Wiki parseFromWikiTableCells(List<String> cells) {
-        Wiki wiki = new Wiki();
         Deque<String> candidates = new LinkedList<>(List.of(cells.get(0).split(System.lineSeparator(), -1)));
-        wiki.id = candidates.poll();
+        String id = candidates.poll();
+        List<String> aliases = new ArrayList<>();
+        List<WikiStage> stages = WikiStage.parse(cells.get(2));
         while (!candidates.isEmpty()) {
             String candidate = candidates.poll();
             if (candidate.matches("\\(.*\\)")) {
-                wiki.aliases.add(candidate.substring(0,candidate.length() - 1));
+                aliases.add(candidate.substring(0,candidate.length() - 1));
             }
             else {
-                wiki.id = wiki.id + "-" + candidate;
+                id = id + "-" + candidate;
             }
         }
-        wiki.name = cells.get(1);
-        wiki.description = cells.get(2);
-        wiki.fuel = Integer.parseInt(cells.get(3));
-        wiki.bullet = Integer.parseInt(cells.get(4));
-        wiki.steel = Integer.parseInt(cells.get(5));
-        wiki.bauxite = Integer.parseInt(cells.get(6));
-        wiki.bonus = cells.get(7);
-        wiki.stages.addAll(WikiStage.parse(wiki.description));
-        wiki.oldStages.addAll(wiki.stages.stream().map(WikiStage::toOldWikiStage).toList());
-        return wiki;
+        return new Wiki(
+                id,
+                cells.get(1),
+                cells.get(2),
+                Integer.parseInt(cells.get(3)),
+                Integer.parseInt(cells.get(4)),
+                Integer.parseInt(cells.get(5)),
+                Integer.parseInt(cells.get(6)),
+                cells.get(7),
+                stages.stream().map(WikiStage::toOldWikiStage).toList(),
+                stages,
+                aliases
+        );
     }
-
-    public String getId() { return id; }
-    public String getName() { return name; }
-    public String getDescription() { return description; }
-    public int getFuel() { return this.fuel; }
-    public int getBullet() { return this.bullet; }
-    public int getSteel() { return this.steel; }
-    public int getBauxite() { return this.bauxite; }
-    public String getBonus() { return this.bonus; }
-    public List<WikiStage> getStages() { return this.stages; }
-    public List<int[]> getOldStages() { return this.oldStages; }
 }
