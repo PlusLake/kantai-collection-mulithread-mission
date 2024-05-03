@@ -1,15 +1,18 @@
 package main.display;
 
 import main.core.*;
+import main.core.Wiki.Detail;
+import main.exception.Exceptions;
 
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.*;
+import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.List;
 import java.util.function.*;
-import java.util.stream.IntStream;
 
 import static java.awt.event.KeyEvent.*;
 
@@ -182,7 +185,7 @@ public class Composer {
         }
         // Select missions
         if (keyCode == VK_LEFT || keyCode == VK_RIGHT) {
-            cursor[1] = clamp(cursor[1] + keyCode - 38, 0, 2);
+            cursor[1] = Math.min(Math.max(cursor[1] + keyCode - 38, 0), 2);
             if (cursor[1] == 0) cursor[2] = 0;
         }
         if ((keyCode == VK_DOWN || keyCode == VK_UP)) {
@@ -212,7 +215,7 @@ public class Composer {
             Dialog.show(frame, wikis).ifPresent(wiki -> {
                 Mission mission = currentMission();
                 mission.setName(wiki.name());
-                mission.replaceStages(wiki.oldStages().stream().map(array -> Stage.of(array[0], array[1], array[2])).toList());
+                mission.replaceStages(wiki.details().stream().map(Detail::toStage).toList());
             });
         }
     }
@@ -291,11 +294,4 @@ public class Composer {
     }
 
     private record Point(int x, int y) {}
-
-    private static int clamp(int value, int min, int max) {
-        // TODO: move this method somewhere else
-        if (value < min) return min;
-        if (value > max) return max;
-        return value;
-    }
 }

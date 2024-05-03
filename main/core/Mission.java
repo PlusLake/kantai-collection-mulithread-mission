@@ -52,12 +52,12 @@ public class Mission {
         Stream
                 .of(splitted[1].split("_"))
                 .map(stage -> Stream.of(stage.split("-")).map(Integer::parseInt).toArray(Integer[]::new))
-                .map(array -> Stage.of(array[0], array[1], array[2], array[3]))
+                .map(array -> Stage.of(array[0], array[1], array[2], array[3], array[4]))
                 .forEach(mission.stages::add);
         return mission;
     }
 
     public static Mission defaultMission() {
-        return Mission.parse("Press enter to select\t1-1-0-1");
+        return Mission.parse("Press enter to select\t1-1-0-0-1");
     }
 }

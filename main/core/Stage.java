@@ -22,8 +22,7 @@ public class Stage {
     }
 
     public String toString() {
-        // TODO: support extra
-        return "%d-%d-%d-%d".formatted(first, second, count, total);
+        return "%d-%d-%d-%d-%d".formatted(first, second, extra, count, total);
     }
 
     public void update(int first, int second) {
