@@ -22,14 +22,17 @@ public class Dialog {
     private static final Color INPUT_COLOR = new Color(255, 160, 160);
     private static final Color FONT_COLOR = new Color(32, 32, 32);
     private static final Color EVEN_ROW_COLOR = new Color(255, 224, 224);
+    private static final Color REWARD_BACKGROUND_COLOR = new Color(224, 224, 224);
     private static final int ROW_HEIGHT = 20;
     private static final int CURSOR_RADIUS = 4;
     private static final int INPUT_PADDING = 4;
     private static final int INPUT_HEIGHT = 40;
     private static final int LINE_POSITION = 14;
-    private static final int PAGE_SIZE = 8;
-    private static final Dimension PANEL_SIZE = new Dimension(500, PAGE_SIZE * ROW_HEIGHT + INPUT_HEIGHT);
-    private static final Dimension DETAIL_SIZE = new Dimension(300, PANEL_SIZE.height);
+    private static final int PAGE_SIZE = 10;
+    private static final int REWARD_HEIGHT = ROW_HEIGHT * 2;
+    private static final int REWARD_ICON_SIZE = 32;
+    private static final Dimension PANEL_SIZE = new Dimension(600, PAGE_SIZE * ROW_HEIGHT + INPUT_HEIGHT);
+    private static final Dimension DETAIL_SIZE = new Dimension(400, PANEL_SIZE.height - REWARD_HEIGHT);
     private static final Dimension INPUT_SIZE = new Dimension(PANEL_SIZE.width - DETAIL_SIZE.width, INPUT_HEIGHT);
 
     private final JDialog dialog;
@@ -49,6 +52,7 @@ public class Dialog {
         JTextField textField = input(searchResult -> {
             filteredWikis.set(searchResult);
             cursor = -1;
+            detail.setText("");
             if (!searchResult.isEmpty()) {
                 detail.setText(searchResult.get(0).description());
                 cursor = 0;
@@ -147,10 +151,16 @@ public class Dialog {
     }
 
     private void render(Graphics2D graphics, List<Wiki> wikis) {
-        AffineTransform origin = graphics.getTransform();
-        int flooredCursor = wikis.isEmpty() ? 0 : Math.floorMod(cursor, wikis.size());
         graphics.setColor(BACKGROUND_COLOR);
         graphics.fillRect(0, 0, PANEL_SIZE.width, PANEL_SIZE.height);
+
+        renderWikis(graphics, wikis);
+        renderRewards(graphics);
+    }
+
+    private void renderWikis(Graphics2D graphics, List<Wiki> wikis) {
+        AffineTransform origin = graphics.getTransform();
+        int flooredCursor = wikis.isEmpty() ? 0 : Math.floorMod(cursor, wikis.size());
         AtomicInteger currentRow = new AtomicInteger();
         graphics.translate(0, INPUT_SIZE.height);
         if (cursor >= PAGE_SIZE) {
@@ -170,6 +180,38 @@ public class Dialog {
             graphics.translate(0, ROW_HEIGHT);
         });
         graphics.setTransform(origin);
+    }
+
+    private void renderRewards(Graphics2D graphics) {
+        graphics.setColor(REWARD_BACKGROUND_COLOR);
+        graphics.fillRect(INPUT_SIZE.width, PANEL_SIZE.height - REWARD_HEIGHT, PANEL_SIZE.width, REWARD_HEIGHT);
+        AffineTransform transform = graphics.getTransform();
+        graphics.translate(INPUT_SIZE.width + 10, PANEL_SIZE.height - (REWARD_HEIGHT + REWARD_ICON_SIZE) / 2);
+        Optional<int[]> rewards = Optional
+                .ofNullable(filteredWikis.get())
+                .filter(wikis -> wikis.size() > cursor)
+                .filter(wikis -> cursor != -1)
+                .map(wikis -> wikis.get(cursor))
+                .map(wiki -> new int[] { wiki.fuel(), wiki.bullet(), wiki.steel(), wiki.bauxite() });
+        graphics.setColor(FONT_COLOR);
+        for (int i = 0; i < 4; i++) {
+            graphics.drawImage(
+                    Images.RESOURCE.image,
+                    0,
+                    0,
+                    REWARD_ICON_SIZE,
+                    REWARD_ICON_SIZE,
+                    REWARD_ICON_SIZE * i,
+                    0,
+                    REWARD_ICON_SIZE * (i + 1),
+                    REWARD_ICON_SIZE,
+                    null
+            );
+            final int index = i;
+            rewards.ifPresent(reward -> graphics.drawString(String.valueOf(reward[index]), 40, 20));
+            graphics.translate(90, 0);
+        }
+        graphics.setTransform(transform);
     }
 
     private static JTextPane detail() {
