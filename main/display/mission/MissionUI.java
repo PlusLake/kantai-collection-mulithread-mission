@@ -136,7 +136,12 @@ public class MissionUI {
                 graphics.drawRect(-1, -1, TOTAL_WIDTH + 1, STAGE_HEIGHT + 1);
             }
             graphics.setColor(FONT_COLOR);
-            graphics.drawString(stage, 4, 15);
+            final int lineY = 15;
+            graphics.drawString(stage, 6, lineY);
+            StageDescription.get(stage).ifPresent(description -> {
+                String string = "%s（%s）".formatted(description.name(), description.operation());
+                graphics.drawString(string, 35, lineY);
+            });
             graphics.translate(0, MISSION_MARGIN + STAGE_HEIGHT);
         });
     }
