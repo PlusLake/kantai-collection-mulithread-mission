@@ -233,6 +233,7 @@ public class MissionUI {
         int keyCode = event.getKeyCode();
         if (event.isControlDown() && keyCode == VK_UP) {
             currentMode = Mode.MAIN;
+            cursor[3] = 0;
             return;
         }
         List<String> stages = distinctedStages();
