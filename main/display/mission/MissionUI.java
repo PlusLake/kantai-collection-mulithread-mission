@@ -51,6 +51,7 @@ public class MissionUI {
 
     public void render(Graphics2D graphics, Dimension size) {
         clear(graphics, size);
+        graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         Translation.execute(graphics, PANEL_PADDING, PANEL_PADDING, () -> renderMissions(graphics, size.height));
         Translation.execute(graphics, 0, size.height - FOOTER_HEIGHT, () -> renderFooter(graphics, size));
         if (currentMode == Mode.STAGE_EDIT) {

@@ -155,6 +155,7 @@ public class WikiSelectionUI {
     private void render(Graphics2D graphics, List<Wiki> wikis) {
         graphics.setColor(BACKGROUND_COLOR);
         graphics.fillRect(0, 0, PANEL_SIZE.width, PANEL_SIZE.height);
+        graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         Translation.execute(graphics, () -> renderWikis(graphics, wikis));
         Translation.execute(graphics, () -> renderRewards(graphics));
     }

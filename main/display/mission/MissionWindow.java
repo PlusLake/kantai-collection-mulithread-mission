@@ -1,5 +1,7 @@
 package main.display.mission;
 
+import main.logging.Log;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -26,7 +28,7 @@ public class MissionWindow {
     private JPanel panel(BiConsumer<Graphics2D, Dimension> renderer) {
         return new JPanel(null) {
             protected void paintComponent(Graphics graphics) {
-                renderer.accept((Graphics2D) graphics, getSize());
+                Log.timer("MissionUI rendering", () -> renderer.accept((Graphics2D) graphics, getSize()));
             }
         };
     }
