@@ -6,7 +6,7 @@ run:
 	java -jar kancolle-multi.jar
 
 compile:
-	find -name "*.java" -print | xargs javac -d target
+	find -name "*.java" | xargs javac -d target
 
 package:
 	cp -r resource/ target
