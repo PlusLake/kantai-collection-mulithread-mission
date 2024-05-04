@@ -1,7 +1,10 @@
-package main.display;
+package main.display.mission;
 
 import main.core.*;
 import main.core.Wiki.Detail;
+import main.display.Translation;
+import main.display.wiki.WikiSelectionUI;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -12,20 +15,21 @@ import java.util.function.*;
 
 import static java.awt.event.KeyEvent.*;
 
-public class Composer {
+public class MissionUI {
     private static final Color BACKGROUND_COLOR = new Color(255, 192, 192);
     private static final Color CARD_BACKGROUND_COLOR = new Color(255, 240, 240);
     private static final Color FONT_COLOR = new Color(32, 32, 32);
     private static final Color CURSOR_COLOR = Color.RED;
     private static final Color FOOTER_BACKGROUND_COLOR = new Color(255, 160, 160);
 
-    private static final int PANEL_PADDING = 8;
+    protected static final int PANEL_PADDING = 8;
     private static final int MISSION_WIDTH = 150;
     private static final int MISSION_MARGIN = 4;
-    private static final int STAGE_HEIGHT = 20;
-    private static final int STAGE_MARGIN = MISSION_MARGIN;
+    protected static final int STAGE_HEIGHT = 20;
+    protected static final int STAGE_MARGIN = MISSION_MARGIN;
     private static final int STAGE_WIDTH = 50;
-    private static final int FOOTER_HEIGHT = 250;
+    private static final int FOOTER_COUNT = 4;
+    protected static final int FOOTER_HEIGHT = (STAGE_HEIGHT + STAGE_MARGIN) * FOOTER_COUNT + PANEL_PADDING * 2;
     private static final int TOTAL_WIDTH = MISSION_WIDTH + (STAGE_WIDTH + STAGE_MARGIN) * 2;
 
     private final List<Mission> missions = new ArrayList<>();
@@ -35,7 +39,7 @@ public class Composer {
     private Mode currentMode = Mode.MAIN;
     private Rectangle editingArea = null;
 
-    public Composer(List<Mission> missions, List<Wiki> wikis) {
+    public MissionUI(List<Mission> missions, List<Wiki> wikis) {
         this.missions.addAll(missions);
         this.wikis.addAll(wikis);
         if (this.missions.isEmpty()) this.missions.add(Mission.defaultMission());
@@ -47,8 +51,8 @@ public class Composer {
 
     public void render(Graphics2D graphics, Dimension size) {
         clear(graphics, size);
-        transform(graphics, new Point(PANEL_PADDING, PANEL_PADDING), () -> renderMissions(graphics));
-        transform(graphics, new Point(0, size.height - FOOTER_HEIGHT), () -> renderFooter(graphics, size.width));
+        Translation.execute(graphics, PANEL_PADDING, PANEL_PADDING, () -> renderMissions(graphics, size.height));
+        Translation.execute(graphics, 0, size.height - FOOTER_HEIGHT, () -> renderFooter(graphics, size));
         if (currentMode == Mode.STAGE_EDIT) {
             graphics.setColor(new Color(0, 0, 0, 128));
             Area area = new Area(new Rectangle(size));
@@ -62,7 +66,8 @@ public class Composer {
         graphics.fillRect(0, 0, size.width, size.height);
     }
 
-    private void renderMissions(Graphics2D graphics) {
+    private void renderMissions(Graphics2D graphics, int panelHeight) {
+        graphics.translate(0, MissionScrolling.mainTranslation(panelHeight, missions, cursor[0]));
         missions.forEach(mission -> {
             int stages = mission.getStages().size();
             int missionHeight = stages * STAGE_HEIGHT + (stages - 1) * STAGE_MARGIN;
@@ -71,11 +76,11 @@ public class Composer {
             graphics.fillRect(0, 0, MISSION_WIDTH, missionHeight);
             if (currentMode == Mode.MAIN && isCurrentMission && cursor[1] == 0) {
                 graphics.setColor(CURSOR_COLOR);
-                graphics.drawRect(-1, -1, MISSION_WIDTH + 2, missionHeight + 2);
+                graphics.drawRect(-1, -1, MISSION_WIDTH + 1, missionHeight + 1);
             }
             graphics.setColor(FONT_COLOR);
             graphics.drawString(mission.getName(), 8, 16);
-            transform(graphics, new Point(MISSION_WIDTH + STAGE_MARGIN, 0), () -> {
+            Translation.execute(graphics, MISSION_WIDTH + STAGE_MARGIN, 0, () -> {
                 mission.getStages().forEach(stage -> {
                     boolean isCurrentStage = isCurrentMission && mission.getStages().indexOf(stage) == cursor[2];
                     renderStages(graphics, stage, isCurrentStage);
@@ -110,37 +115,30 @@ public class Composer {
             }
             if (isCurrentStage && cursor[1] - 1 == i) {
                 graphics.setColor(CURSOR_COLOR);
-                graphics.drawRect(-1, -1, STAGE_WIDTH + 2, STAGE_HEIGHT + 2);
+                graphics.drawRect(-1, -1, STAGE_WIDTH + 1, STAGE_HEIGHT + 1);
             }
             graphics.translate(STAGE_WIDTH + STAGE_MARGIN, 0);
         }
         graphics.translate((STAGE_WIDTH + STAGE_MARGIN) * -2, STAGE_HEIGHT + MISSION_MARGIN);
     }
 
-    private void renderFooter(Graphics2D graphics, int width) {
+    private void renderFooter(Graphics2D graphics, Dimension size) {
         graphics.setColor(FOOTER_BACKGROUND_COLOR);
-        graphics.fillRect(0, 0, width, FOOTER_HEIGHT);
-        graphics.translate(PANEL_PADDING, PANEL_PADDING);
+        graphics.fillRect(0, 0, size.width, FOOTER_HEIGHT);
+        graphics.setClip(new Rectangle(0, 0, size.width, FOOTER_HEIGHT));
+        graphics.translate(PANEL_PADDING, PANEL_PADDING + MissionScrolling.footerTranslation(cursor[3]));
         List<String> stages = distinctedStages();
-
         stages.forEach(stage -> {
             graphics.setColor(CARD_BACKGROUND_COLOR);
             graphics.fillRect(0, 0, TOTAL_WIDTH, STAGE_HEIGHT);
             if (currentMode == Mode.STAGE_CLEAR && stages.indexOf(stage) == cursor[3]) {
                 graphics.setColor(CURSOR_COLOR);
-                graphics.drawRect(-1, -1, TOTAL_WIDTH + 2, STAGE_HEIGHT + 2);
+                graphics.drawRect(-1, -1, TOTAL_WIDTH + 1, STAGE_HEIGHT + 1);
             }
             graphics.setColor(FONT_COLOR);
             graphics.drawString(stage, 4, 15);
             graphics.translate(0, MISSION_MARGIN + STAGE_HEIGHT);
         });
-    }
-
-    private void transform(Graphics2D graphics, Point point, Runnable runnable) {
-        AffineTransform transform = graphics.getTransform();
-        graphics.translate(point.x, point.y);
-        runnable.run();
-        graphics.setTransform(transform);
     }
 
     public void key(KeyEvent event) {
@@ -207,8 +205,8 @@ public class Composer {
         if (keyCode >= VK_NUMPAD1 && keyCode <= VK_NUMPAD9 && cursor[1] == 1) edit.accept(VK_NUMPAD0);
         if (keyCode >= VK_1 && keyCode <= VK_9 && cursor[1] == 1) edit.accept(VK_0);
         // Open wiki
-        if (keyCode == VK_ENTER) {
-            Dialog.show(frame, wikis).ifPresent(wiki -> {
+        if (keyCode == VK_ENTER && cursor[1] == 0) {
+            WikiSelectionUI.show(frame, wikis).ifPresent(wiki -> {
                 Mission mission = currentMission();
                 mission.setName(wiki.name());
                 mission.replaceStages(wiki.details().stream().map(Detail::toStage).toList());
@@ -280,14 +278,12 @@ public class Composer {
     }
 
     public enum Mode {
-        MAIN(Composer::keyMain),
-        STAGE_CLEAR(Composer::keyClearingStage),
-        STAGE_EDIT(Composer::keyEditingStage);
-        private final BiConsumer<Composer, KeyEvent> keyHandler;
-        Mode(BiConsumer<Composer, KeyEvent> keyHandler) {
+        MAIN(MissionUI::keyMain),
+        STAGE_CLEAR(MissionUI::keyClearingStage),
+        STAGE_EDIT(MissionUI::keyEditingStage);
+        private final BiConsumer<MissionUI, KeyEvent> keyHandler;
+        Mode(BiConsumer<MissionUI, KeyEvent> keyHandler) {
             this.keyHandler = keyHandler;
         }
     }
-
-    private record Point(int x, int y) {}
 }

@@ -1,15 +1,15 @@
-package main.display;
+package main.display.mission;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.function.*;
 
-public class Window {
+public class MissionWindow {
     private final JFrame frame;
     private Runnable whenClose = () -> {};
 
-    public Window(BiConsumer<Graphics2D, Dimension> render) {
+    public MissionWindow(BiConsumer<Graphics2D, Dimension> render) {
         frame = frame(panel(render));
     }
 
@@ -40,7 +40,7 @@ public class Window {
         };
     }
 
-    public Window key(Consumer<KeyEvent> handler) {
+    public MissionWindow key(Consumer<KeyEvent> handler) {
         frame.addKeyListener(new KeyAdapter() {
             public void keyPressed(KeyEvent event) {
                 handler.accept(event);
@@ -50,12 +50,12 @@ public class Window {
         return this;
     }
 
-    public Window whenClose(Runnable whenClose) {
+    public MissionWindow whenClose(Runnable whenClose) {
         this.whenClose = whenClose;
         return this;
     }
 
-    public Window show() {
+    public MissionWindow show() {
         frame.setVisible(true);
         return this;
     }

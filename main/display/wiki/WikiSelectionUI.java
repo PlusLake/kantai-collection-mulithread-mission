@@ -1,6 +1,7 @@
-package main.display;
+package main.display.wiki;
 
 import main.core.Wiki;
+import main.display.*;
 import main.exception.Exceptions;
 
 import javax.swing.*;
@@ -17,7 +18,7 @@ import java.util.function.*;
 
 import static java.awt.event.KeyEvent.*;
 
-public class Dialog {
+public class WikiSelectionUI {
     private static final Color BACKGROUND_COLOR = new Color(255, 192, 192);
     private static final Color INPUT_COLOR = new Color(255, 160, 160);
     private static final Color FONT_COLOR = new Color(32, 32, 32);
@@ -42,7 +43,7 @@ public class Dialog {
 
     private int cursor = -1;
 
-    private Dialog(JFrame frame, List<Wiki> wikis) {
+    private WikiSelectionUI(JFrame frame, List<Wiki> wikis) {
         this.dialog = new JDialog(frame, "任務選択", true);
         this.wikis = wikis;
 
@@ -76,7 +77,7 @@ public class Dialog {
     }
 
     public static Optional<Wiki> show(JFrame frame, List<Wiki> wikis) {
-        return new Dialog(frame, wikis).result();
+        return new WikiSelectionUI(frame, wikis).result();
     }
 
     private static DocumentListener inputListener(List<Wiki> wikis, Consumer<List<Wiki>> callback) {
@@ -154,13 +155,11 @@ public class Dialog {
     private void render(Graphics2D graphics, List<Wiki> wikis) {
         graphics.setColor(BACKGROUND_COLOR);
         graphics.fillRect(0, 0, PANEL_SIZE.width, PANEL_SIZE.height);
-
-        renderWikis(graphics, wikis);
-        renderRewards(graphics);
+        Translation.execute(graphics, () -> renderWikis(graphics, wikis));
+        Translation.execute(graphics, () -> renderRewards(graphics));
     }
 
     private void renderWikis(Graphics2D graphics, List<Wiki> wikis) {
-        AffineTransform origin = graphics.getTransform();
         int flooredCursor = wikis.isEmpty() ? 0 : Math.floorMod(cursor, wikis.size());
         AtomicInteger currentRow = new AtomicInteger();
         graphics.translate(0, INPUT_SIZE.height);
@@ -180,13 +179,11 @@ public class Dialog {
             graphics.drawString(wiki.name(), 70, LINE_POSITION);
             graphics.translate(0, ROW_HEIGHT);
         });
-        graphics.setTransform(origin);
     }
 
     private void renderRewards(Graphics2D graphics) {
         graphics.setColor(REWARD_BACKGROUND_COLOR);
         graphics.fillRect(INPUT_SIZE.width, PANEL_SIZE.height - REWARD_HEIGHT, PANEL_SIZE.width, REWARD_HEIGHT);
-        AffineTransform transform = graphics.getTransform();
         graphics.translate(INPUT_SIZE.width + 10, PANEL_SIZE.height - (REWARD_HEIGHT + REWARD_ICON_SIZE) / 2);
         Optional<int[]> rewards = Optional
                 .ofNullable(filteredWikis.get())
@@ -212,7 +209,6 @@ public class Dialog {
             rewards.ifPresent(reward -> graphics.drawString(String.valueOf(reward[index]), 40, 20));
             graphics.translate(90, 0);
         }
-        graphics.setTransform(transform);
     }
 
     private static JTextPane detail() {
