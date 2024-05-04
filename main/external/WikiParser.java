@@ -1,9 +1,5 @@
 package main.external;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.*;
-import java.net.http.HttpResponse.BodyHandlers;
 import java.util.*;
 import java.util.regex.*;
 
