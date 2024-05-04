@@ -89,17 +89,18 @@ public class Dialog {
                 String text = Exceptions
                         .wrap(() -> document.getText(0, document.getLength()))
                         .toLowerCase();
-                Predicate<Wiki> grepCode = wiki -> wiki.id().toLowerCase().contains(text);
-                Predicate<Wiki> grepName = wiki -> wiki.name().contains(text);
                 CompletableFuture
-                        .supplyAsync(() -> wikis
-                            .stream()
-                            .filter(wiki -> !text.isEmpty())
-                            .filter(grepCode.or(grepName))
-                            .toList())
+                        .supplyAsync(filterWiki(wikis, text))
                         .thenAccept(callback);
             }
         };
+    }
+
+    private static Supplier<List<Wiki>> filterWiki(List<Wiki> wikis, String text) {
+        Predicate<Wiki> grepCode = wiki -> wiki.id().toLowerCase().contains(text);
+        Predicate<Wiki> grepName = wiki -> wiki.name().contains(text);
+        if (text.isEmpty()) return List::of;
+        return () -> wikis.stream().filter(grepCode.or(grepName)).toList();
     }
 
     private JPanel panel(AtomicReference<List<Wiki>> wikiReference) {
