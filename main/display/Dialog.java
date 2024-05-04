@@ -31,7 +31,7 @@ public class Dialog {
     private static final int PAGE_SIZE = 10;
     private static final int REWARD_HEIGHT = ROW_HEIGHT * 2;
     private static final int REWARD_ICON_SIZE = 32;
-    private static final Dimension PANEL_SIZE = new Dimension(600, PAGE_SIZE * ROW_HEIGHT + INPUT_HEIGHT);
+    private static final Dimension PANEL_SIZE = new Dimension(650, PAGE_SIZE * ROW_HEIGHT + INPUT_HEIGHT);
     private static final Dimension DETAIL_SIZE = new Dimension(400, PANEL_SIZE.height - REWARD_HEIGHT);
     private static final Dimension INPUT_SIZE = new Dimension(PANEL_SIZE.width - DETAIL_SIZE.width, INPUT_HEIGHT);
 
@@ -176,7 +176,7 @@ public class Dialog {
                 graphics.fillOval(4, ROW_HEIGHT / 2 - CURSOR_RADIUS, CURSOR_RADIUS, CURSOR_RADIUS);
             }
             graphics.drawString(wiki.id(), 18, LINE_POSITION);
-            graphics.drawString(wiki.name(), 60, LINE_POSITION);
+            graphics.drawString(wiki.name(), 70, LINE_POSITION);
             graphics.translate(0, ROW_HEIGHT);
         });
         graphics.setTransform(origin);
