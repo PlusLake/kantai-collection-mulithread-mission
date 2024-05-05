@@ -42,7 +42,7 @@ public class WikiSelectionUI {
 
     private int cursor = -1;
 
-    private WikiSelectionUI(JFrame frame, List<Wiki> wikis) {
+    private WikiSelectionUI(JFrame frame, List<Wiki> wikis, String search) {
         this.dialog = new JDialog(frame, "任務選択", true);
         this.wikis = wikis;
 
@@ -61,6 +61,7 @@ public class WikiSelectionUI {
         });
         panel.add(textField);
         panel.add(detail);
+        textField.setText(search);
         dialog.setContentPane(panel);
         dialog.pack();
         dialog.setLocationRelativeTo(frame);
@@ -76,7 +77,11 @@ public class WikiSelectionUI {
     }
 
     public static Optional<Wiki> show(JFrame frame, List<Wiki> wikis) {
-        return new WikiSelectionUI(frame, wikis).result();
+        return WikiSelectionUI.show(frame, wikis, null);
+    }
+
+    public static Optional<Wiki> show(JFrame frame, List<Wiki> wikis, String init) {
+        return new WikiSelectionUI(frame, wikis, init).result();
     }
 
     private static DocumentListener inputListener(List<Wiki> wikis, Consumer<List<Wiki>> callback) {

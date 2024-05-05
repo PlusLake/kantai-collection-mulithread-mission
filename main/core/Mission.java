@@ -60,4 +60,9 @@ public class Mission {
     public static Mission defaultMission() {
         return Mission.parse("Press enter to select\t1-1-0-0-1");
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof Mission other && this.name.equals(other.name) && this.stages.equals(other.stages);
+    }
 }

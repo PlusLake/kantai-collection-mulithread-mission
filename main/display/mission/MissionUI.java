@@ -212,7 +212,8 @@ public class MissionUI {
         if (keyCode >= VK_1 && keyCode <= VK_9 && cursor[1] == 1) edit.accept(VK_0);
         // Open wiki
         if (keyCode == VK_ENTER && cursor[1] == 0) {
-            WikiSelectionUI.show(frame, wikis).ifPresent(wiki -> {
+            Mission current = this.missions.get(this.cursor[0]);
+            WikiSelectionUI.show(frame, wikis, !Mission.defaultMission().equals(current) ? current.getName() : "").ifPresent(wiki -> {
                 Mission mission = currentMission();
                 mission.setName(wiki.name());
                 mission.replaceStages(wiki.details().stream().map(Detail::toStage).toList());
