@@ -44,9 +44,9 @@ public class WikiSelectionUI {
     private int cursor = -1;
 
     private WikiSelectionUI(JFrame frame, List<Wiki> wikis, String search) {
-        this.dialog = new JDialog(frame, "任務選択", true);
-        this.wikis = wikis;
         this.asViewer = Objects.nonNull(search) && !search.isBlank();
+        this.dialog = new JDialog(frame, "任務選択" + (this.asViewer ? " (read-only)" : ""), true);
+        this.wikis = wikis;
 
         dialog.setResizable(false);
         dialog.setLocationRelativeTo(frame);
@@ -64,6 +64,7 @@ public class WikiSelectionUI {
         panel.add(textField);
         panel.add(detail);
         textField.setText(search);
+        textField.setEditable(!this.asViewer);
         dialog.setContentPane(panel);
         dialog.pack();
         dialog.setLocationRelativeTo(frame);
