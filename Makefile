@@ -16,7 +16,9 @@ package:
 
 native:
 	# Work in progress; Input method still not usable with Liberica NIK
-	/opt/bellsoft/liberica-vm-24.0.1-openjdk22/bin/native-image \
+	# sudo apt install libxi-dev libxrender-dev
+	# sdk install java 23.0.4.r17-nik
+	native-image \
 		-Djava.awt.headless=false \
 		-H:IncludeResources="resource.*" \
 		-jar kancolle-multi.jar native/kcmm
