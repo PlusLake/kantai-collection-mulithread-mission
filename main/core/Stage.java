@@ -49,9 +49,4 @@ public class Stage {
     public static Stage of(int first, int second, int extra) {
         return new Stage(first, second, extra, 0, 1);
     }
-
-    @Override
-    public boolean equals(Object obj) {
-        return obj instanceof Stage other && this.toString().equals(other.toString());
-    }
 }

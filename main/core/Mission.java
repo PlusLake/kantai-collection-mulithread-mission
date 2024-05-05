@@ -61,8 +61,9 @@ public class Mission {
         return Mission.parse("Press enter to select\t1-1-0-0-1");
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        return obj instanceof Mission other && this.name.equals(other.name) && this.stages.equals(other.stages);
+    public boolean isDefaultMission() {
+        return name.equals(defaultMission().name)
+                && stages.size() == 1
+                && stages.get(0).name().equals("1-1");
     }
 }
