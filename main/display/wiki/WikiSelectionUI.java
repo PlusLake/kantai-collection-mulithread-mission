@@ -39,11 +39,13 @@ public class WikiSelectionUI {
     private final List<Wiki> wikis;
     private final AtomicReference<List<Wiki>> filteredWikis = new AtomicReference<>(List.of());
     private final JTextPane detail = detail();
+    private final boolean asViewer;
 
     private int cursor = -1;
 
-    private WikiSelectionUI(JFrame frame, List<Wiki> wikis) {
-        this.dialog = new JDialog(frame, "任務選択", true);
+    private WikiSelectionUI(JFrame frame, List<Wiki> wikis, String search) {
+        this.asViewer = Objects.nonNull(search) && !search.isBlank();
+        this.dialog = new JDialog(frame, "任務選択" + (this.asViewer ? " (read-only)" : ""), true);
         this.wikis = wikis;
 
         dialog.setResizable(false);
@@ -61,6 +63,8 @@ public class WikiSelectionUI {
         });
         panel.add(textField);
         panel.add(detail);
+        textField.setText(search);
+        textField.setEditable(!this.asViewer);
         dialog.setContentPane(panel);
         dialog.pack();
         dialog.setLocationRelativeTo(frame);
@@ -76,7 +80,11 @@ public class WikiSelectionUI {
     }
 
     public static Optional<Wiki> show(JFrame frame, List<Wiki> wikis) {
-        return new WikiSelectionUI(frame, wikis).result();
+        return WikiSelectionUI.show(frame, wikis, null);
+    }
+
+    public static Optional<Wiki> show(JFrame frame, List<Wiki> wikis, String init) {
+        return new WikiSelectionUI(frame, wikis, init).result();
     }
 
     private static DocumentListener inputListener(List<Wiki> wikis, Consumer<List<Wiki>> callback) {
@@ -123,7 +131,10 @@ public class WikiSelectionUI {
         textField.setBackground(INPUT_COLOR);
         textField.setSize(INPUT_SIZE);
         Map<Integer, Consumer<Integer>> map = Map.of(
-                VK_ENTER, keyCode -> dialog.setVisible(false),
+                VK_ENTER, keyCode -> {
+                    dialog.setVisible(false);
+                    cursor = this.asViewer ? -1 : cursor;
+                },
                 VK_ESCAPE, keyCode -> {
                     dialog.setVisible(false);
                     cursor = -1;
