@@ -39,12 +39,14 @@ public class WikiSelectionUI {
     private final List<Wiki> wikis;
     private final AtomicReference<List<Wiki>> filteredWikis = new AtomicReference<>(List.of());
     private final JTextPane detail = detail();
+    private final boolean asViewer;
 
     private int cursor = -1;
 
     private WikiSelectionUI(JFrame frame, List<Wiki> wikis, String search) {
         this.dialog = new JDialog(frame, "任務選択", true);
         this.wikis = wikis;
+        this.asViewer = Objects.nonNull(search) && !search.isBlank();
 
         dialog.setResizable(false);
         dialog.setLocationRelativeTo(frame);
@@ -128,7 +130,10 @@ public class WikiSelectionUI {
         textField.setBackground(INPUT_COLOR);
         textField.setSize(INPUT_SIZE);
         Map<Integer, Consumer<Integer>> map = Map.of(
-                VK_ENTER, keyCode -> dialog.setVisible(false),
+                VK_ENTER, keyCode -> {
+                    dialog.setVisible(false);
+                    cursor = this.asViewer ? -1 : cursor;
+                },
                 VK_ESCAPE, keyCode -> {
                     dialog.setVisible(false);
                     cursor = -1;
