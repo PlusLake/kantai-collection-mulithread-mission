@@ -1,7 +1,16 @@
+# Intellij related
 .idea
 *.iml
+
+# VSCode related
+*.diff
+*.log
+
+# Compiled
 *.jar
 out
 target
-*.diff
-*.log
+
+# GraalVM related
+native/*
+!native/.gitkeep
