@@ -58,8 +58,8 @@ public class WikiSelectionUI {
             cursor = -1;
             detail.setText("");
             if (!searchResult.isEmpty()) {
-                detail.setText(searchResult.get(0).description());
                 detail.setFont(Fonts.JAPANESE.font);
+                detail.setText(searchResult.get(0).description());
                 cursor = 0;
             }
             dialog.repaint();
