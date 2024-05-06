@@ -50,6 +50,7 @@ public class WikiSelectionUI {
 
         dialog.setResizable(false);
         dialog.setLocationRelativeTo(frame);
+        dialog.addWindowListener(cancelWhenClose());
         JPanel panel = panel(filteredWikis);
         JTextField textField = input(searchResult -> {
             filteredWikis.set(searchResult);
@@ -220,6 +221,14 @@ public class WikiSelectionUI {
             rewards.ifPresent(reward -> graphics.drawString(String.valueOf(reward[index]), 40, 20));
             graphics.translate(90, 0);
         }
+    }
+
+    private WindowListener cancelWhenClose() {
+        return new WindowAdapter() {
+            public void windowClosing(WindowEvent event) {
+                cursor = -1;
+            }
+        };
     }
 
     private static JTextPane detail() {
