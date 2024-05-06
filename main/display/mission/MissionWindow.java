@@ -20,17 +20,19 @@ public class MissionWindow {
         frame.setContentPane(panel);
         frame.addWindowListener(windowListener());
         frame.pack();
-        frame.setSize(new Dimension(400, 600)); // TODO: calculate size instead of this
         frame.setLocationRelativeTo(null);
+        frame.addComponentListener(new FrameSizeTuner());
         return frame;
     }
 
     private JPanel panel(BiConsumer<Graphics2D, Dimension> renderer) {
-        return new JPanel(null) {
+        JPanel panel = new JPanel(null) {
             protected void paintComponent(Graphics graphics) {
                 Log.timer("MissionUI rendering", () -> renderer.accept((Graphics2D) graphics, getSize()));
             }
         };
+        panel.setPreferredSize(new Dimension(MissionUI.TOTAL_WIDTH + MissionUI.PANEL_PADDING * 2, 400));
+        return panel;
     }
 
     private WindowAdapter windowListener() {
@@ -60,5 +62,18 @@ public class MissionWindow {
     public MissionWindow show() {
         frame.setVisible(true);
         return this;
+    }
+
+    private static class FrameSizeTuner extends ComponentAdapter {
+        public void componentResized(ComponentEvent event) {
+            // At most of the time, simply using setMinimumSize(new Dimension(x, y)) is just "OK"
+            // However the result size depends on different OSes. For example,
+            // Windows 7/Vista's window has thickness so that the panel can be smaller than we expected.
+            // So we just wait JFrame#pack takes effect, and fire this callback to set the correct min size,
+            // and finally remove the callback from the JFrame.
+            JFrame frame = (JFrame) event.getSource();
+            frame.setMinimumSize(frame.getSize());
+            frame.removeComponentListener(this);
+        }
     }
 }

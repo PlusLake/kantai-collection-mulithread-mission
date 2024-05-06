@@ -30,7 +30,7 @@ public class MissionUI {
     private static final int STAGE_WIDTH = 50;
     private static final int FOOTER_COUNT = 4;
     protected static final int FOOTER_HEIGHT = (STAGE_HEIGHT + STAGE_MARGIN) * FOOTER_COUNT + PANEL_PADDING * 2;
-    private static final int TOTAL_WIDTH = MISSION_WIDTH + (STAGE_WIDTH + STAGE_MARGIN) * 2;
+    protected static final int TOTAL_WIDTH = MISSION_WIDTH + (STAGE_WIDTH + STAGE_MARGIN) * 2;
 
     private final List<Mission> missions = new ArrayList<>();
     private final List<Wiki> wikis = new ArrayList<>();
