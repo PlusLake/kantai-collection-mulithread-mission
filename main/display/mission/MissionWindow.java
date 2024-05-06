@@ -31,7 +31,7 @@ public class MissionWindow {
                 Log.timer("MissionUI rendering", () -> renderer.accept((Graphics2D) graphics, getSize()));
             }
         };
-        panel.setPreferredSize(new Dimension(MissionUI.TOTAL_WIDTH + MissionUI.PANEL_PADDING * 2, 400));
+        panel.setPreferredSize(new Dimension(MissionUI.TOTAL_WIDTH + MissionUI.PANEL_PADDING * 2, 500));
         return panel;
     }
 

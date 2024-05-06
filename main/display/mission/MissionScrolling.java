@@ -8,6 +8,7 @@ public class MissionScrolling {
     protected static int mainTranslation(int panelHeight, List<Mission> missions, int cursor) {
         int result = panelHeight
                 - MissionUI.FOOTER_HEIGHT
+                - MissionUI.TIP_HEIGHT
                 - currentMissionY(missions, cursor)
                 - missionY(missions, cursor, 1)
                 + MissionUI.STAGE_MARGIN

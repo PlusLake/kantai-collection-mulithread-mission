@@ -8,9 +8,11 @@ public class Translation {
         AffineTransform transform = graphics.getTransform();
         Shape shape = graphics.getClip();
         graphics.translate(x, y);
+        Font font = graphics.getFont();
         runnable.run();
         graphics.setTransform(transform);
         graphics.setClip(shape);
+        graphics.setFont(font);
     }
 
     public static void execute(Graphics2D graphics, Runnable runnable) {

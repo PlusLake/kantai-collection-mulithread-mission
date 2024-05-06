@@ -2,7 +2,7 @@ package main.display.mission;
 
 import main.core.*;
 import main.core.Wiki.Detail;
-import main.display.Translation;
+import main.display.*;
 import main.display.wiki.WikiSelectionUI;
 
 import javax.swing.*;
@@ -21,6 +21,8 @@ public class MissionUI {
     private static final Color FONT_COLOR = new Color(32, 32, 32);
     private static final Color CURSOR_COLOR = Color.RED;
     private static final Color FOOTER_BACKGROUND_COLOR = new Color(255, 160, 160);
+    private static final Color TIP_BACKGROUND_COLOR = new Color(192, 96, 96);
+    private static final Color TIP_FONT_COLOR = new Color(255, 224, 224);
 
     protected static final int PANEL_PADDING = 8;
     private static final int MISSION_WIDTH = 150;
@@ -29,8 +31,9 @@ public class MissionUI {
     protected static final int STAGE_MARGIN = MISSION_MARGIN;
     private static final int STAGE_WIDTH = 50;
     private static final int FOOTER_COUNT = 4;
-    protected static final int FOOTER_HEIGHT = (STAGE_HEIGHT + STAGE_MARGIN) * FOOTER_COUNT + PANEL_PADDING * 2;
+    protected static final int FOOTER_HEIGHT = (STAGE_HEIGHT + STAGE_MARGIN) * FOOTER_COUNT + PANEL_PADDING * 2 - STAGE_MARGIN;
     protected static final int TOTAL_WIDTH = MISSION_WIDTH + (STAGE_WIDTH + STAGE_MARGIN) * 2;
+    protected static final int TIP_HEIGHT = 50;
 
     private final List<Mission> missions = new ArrayList<>();
     private final List<Wiki> wikis = new ArrayList<>();
@@ -51,12 +54,14 @@ public class MissionUI {
 
     public void render(Graphics2D graphics, Dimension size) {
         clear(graphics, size);
+        graphics.setFont(Fonts.JAPANESE.font);
         graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         Translation.execute(graphics, PANEL_PADDING, PANEL_PADDING, () -> renderMissions(graphics, size.height));
-        Translation.execute(graphics, 0, size.height - FOOTER_HEIGHT, () -> renderFooter(graphics, size));
+        Translation.execute(graphics, 0, size.height - FOOTER_HEIGHT - TIP_HEIGHT, () -> renderFooter(graphics, size));
+        Translation.execute(graphics, 0, size.height - TIP_HEIGHT, () -> renderTip(graphics, size.width));
         if (currentMode == Mode.STAGE_EDIT) {
             graphics.setColor(new Color(0, 0, 0, 128));
-            Area area = new Area(new Rectangle(size));
+            Area area = new Area(new Rectangle(0, 0, size.width, size.height - TIP_HEIGHT));
             area.subtract(new Area(editingArea));
             graphics.fill(area);
         }
@@ -145,6 +150,65 @@ public class MissionUI {
             });
             graphics.translate(0, MISSION_MARGIN + STAGE_HEIGHT);
         });
+    }
+
+    private void renderTip(Graphics2D graphics, int width) {
+        final int LINE_START_X = 4;
+        final int LINE_START_Y = 15;
+        final int INTERVAL_X = 10;
+        final int INTERVAL_Y = 15;
+        ArrayList<String> tips = new ArrayList<>(List.of(""));
+        graphics.setColor(TIP_BACKGROUND_COLOR);
+        graphics.fillRect(0, 0, width, TIP_HEIGHT);
+        graphics.setColor(TIP_FONT_COLOR);
+        graphics.setFont(Fonts.MONO.font);
+        generateTips(tips);
+        Function<String, Integer> textWidth = graphics.getFontMetrics()::stringWidth;
+        int cursor = LINE_START_X;
+        for (int i = 1, y = LINE_START_Y; i < tips.size(); i++) {
+            cursor += textWidth.apply(tips.get(i - 1)) + (i == 1 ? 0 : INTERVAL_X);
+            if (cursor + textWidth.apply(tips.get(i)) > (width - INTERVAL_X)) {
+                cursor = LINE_START_X;
+                y += INTERVAL_Y;
+            }
+            graphics.drawString(tips.get(i), cursor, y);
+        }
+    }
+
+    private void generateTips(List<String> tips) {
+        Map<Integer, List<String>> main = Map.of(
+                0, List.of(
+                        "[+] Add mission",
+                        "[-] Remove selecting mission",
+                        "[Enter] Open Wiki"
+                ),
+                1, List.of(
+                        "[+] Add stage",
+                        "[-] Remove stage",
+                        "[1-9] Edit stage code"
+                ),
+                2, List.of(
+                        "[+] Add total",
+                        "[-] Minus total",
+                        "[Ctrl +] Add count",
+                        "[Ctrl -] Minus count"
+                )
+        );
+        if (currentMode == Mode.MAIN) {
+            tips.add("[↑↓←→] Navigate");
+            tips.add("[Ctrl ↓] Clear mode");
+            tips.addAll(main.get(cursor[1]));
+        }
+        if (currentMode == Mode.STAGE_CLEAR) {
+            tips.add("[↑↓] Navigate");
+            tips.add("[Ctrl ↑] Normal mode");
+            tips.add("[+] Add count");
+            tips.add("[-] Minus count");
+        }
+        if (currentMode == Mode.STAGE_EDIT) {
+            tips.add("[Esc] Cancel");
+            tips.add("[1-9] Enter stage code");
+        }
     }
 
     public void key(KeyEvent event) {

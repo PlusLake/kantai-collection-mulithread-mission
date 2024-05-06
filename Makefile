@@ -1,6 +1,6 @@
 .PHONY: main native
 
-main: compile package run
+main: clean compile package run
 
 run:
 	java -jar kancolle-multi.jar
@@ -25,3 +25,6 @@ native:
 
 native-run:
 	./native/kcmm
+
+clean:
+	rm -r target

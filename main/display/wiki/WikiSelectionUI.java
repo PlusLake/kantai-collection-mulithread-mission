@@ -52,12 +52,14 @@ public class WikiSelectionUI {
         dialog.setLocationRelativeTo(frame);
         dialog.addWindowListener(cancelWhenClose());
         JPanel panel = panel(filteredWikis);
+        panel.setFont(Fonts.JAPANESE.font);
         JTextField textField = input(searchResult -> {
             filteredWikis.set(searchResult);
             cursor = -1;
             detail.setText("");
             if (!searchResult.isEmpty()) {
                 detail.setText(searchResult.get(0).description());
+                detail.setFont(Fonts.JAPANESE.font);
                 cursor = 0;
             }
             dialog.repaint();
@@ -66,6 +68,7 @@ public class WikiSelectionUI {
         panel.add(detail);
         textField.setText(search);
         textField.setEditable(!this.asViewer);
+        textField.setFont(Fonts.JAPANESE.font);
         dialog.setContentPane(panel);
         dialog.pack();
         dialog.setLocationRelativeTo(frame);
