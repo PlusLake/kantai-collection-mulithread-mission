@@ -46,7 +46,4 @@ public class Stage {
     public static Stage of(int first, int second) {
         return new Stage(first, second, 0, 0, 1);
     }
-    public static Stage of(int first, int second, int extra) {
-        return new Stage(first, second, extra, 0, 1);
-    }
 }

@@ -40,7 +40,7 @@ java -jar kancolle-multi.jar
 
 ## Memo / Other info
 
-- Data will be saved when the Window is closed. (Force killing the Window will causes data lost)
+- Data will be saved when the Window is closed. (Force killing the Window will cause data lost)
 - This repo is maintained by this two guy:
   - [@PlusLake](https://github.com/PlusLake)
   - [@PGKan](https://github.com/PGKan)

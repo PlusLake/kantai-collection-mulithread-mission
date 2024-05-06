@@ -86,12 +86,10 @@ public class MissionUI {
             }
             graphics.setColor(FONT_COLOR);
             graphics.drawString(mission.getName(), 8, 16);
-            Translation.execute(graphics, MISSION_WIDTH + STAGE_MARGIN, 0, () -> {
-                mission.getStages().forEach(stage -> {
-                    boolean isCurrentStage = isCurrentMission && mission.getStages().indexOf(stage) == cursor[2];
-                    renderStages(graphics, stage, isCurrentStage);
-                });
-            });
+            Translation.execute(graphics, MISSION_WIDTH + STAGE_MARGIN, 0, () -> mission.getStages().forEach(stage -> {
+                boolean isCurrentStage = isCurrentMission && mission.getStages().indexOf(stage) == cursor[2];
+                renderStages(graphics, stage, isCurrentStage);
+            }));
             graphics.translate(0, missionHeight + MISSION_MARGIN);
         });
     }
@@ -305,7 +303,6 @@ public class MissionUI {
         List<String> stages = distinctedStages();
         int stageSize = stages.size();
         String currentStage = stages.get(cursor[3]);
-
         if (keyCode == VK_UP || keyCode == VK_DOWN) {
             cursor[3] += keyCode - 39;
             cursor[3] = (cursor[3] + stageSize) % stageSize;
@@ -317,9 +314,9 @@ public class MissionUI {
                 VK_PAGE_DOWN, Stage::minusCount
         );
         Predicate<Stage> filter = stage -> stage.name().equals(currentStage);
-        Optional.ofNullable(map.get(keyCode)).ifPresent(callback -> missions.forEach(mission -> {
-            mission.computeAllStages(filter, callback);
-        }));
+        Optional
+                .ofNullable(map.get(keyCode))
+                .ifPresent(callback -> missions.forEach(mission -> mission.computeAllStages(filter, callback)));
     }
 
     private void keyEditingStage(KeyEvent event) {

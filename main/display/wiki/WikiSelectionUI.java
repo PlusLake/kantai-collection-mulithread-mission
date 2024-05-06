@@ -83,10 +83,6 @@ public class WikiSelectionUI {
                 .map(wikis -> wikis.get(cursor));
     }
 
-    public static Optional<Wiki> show(JFrame frame, List<Wiki> wikis) {
-        return WikiSelectionUI.show(frame, wikis, null);
-    }
-
     public static Optional<Wiki> show(JFrame frame, List<Wiki> wikis, String init) {
         return new WikiSelectionUI(frame, wikis, init).result();
     }
