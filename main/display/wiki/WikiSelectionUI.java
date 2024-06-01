@@ -106,7 +106,7 @@ public class WikiSelectionUI {
 
     private static Supplier<List<Wiki>> filterWiki(List<Wiki> wikis, String text) {
         Predicate<Wiki> grepCode = wiki -> wiki.id().toLowerCase().contains(text);
-        Predicate<Wiki> grepName = wiki -> wiki.name().contains(text);
+        Predicate<Wiki> grepName = wiki -> wiki.name().toLowerCase().contains(text);
         if (text.isEmpty()) return List::of;
         return () -> wikis.stream().filter(grepCode.or(grepName)).toList();
     }
