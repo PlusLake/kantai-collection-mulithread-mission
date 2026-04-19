@@ -1,18 +1,24 @@
 .PHONY: main native
 
+TARGET_PATH := ./target
+SOURCE_PATH := ./src
+JAVA_PATH := ${SOURCE_PATH}/java
+RESOURCE_PATH := ${SOURCE_PATH}/resources
+JAR_NAME := kancolle-multi.jar
+
 main: clean compile package run
 
 run:
-	java -jar kancolle-multi.jar
+	java -jar ./${TARGET_PATH}/${JAR_NAME}
 
 compile:
-	find -name "*.java" | xargs javac -d target
+	find ${JAVA_PATH} -type f -name "*.java" | xargs javac --source-path ${JAVA_PATH} -d ${TARGET_PATH}/classes
 
 package:
-	cp -r resource/ target
-	jar cvf kancolle-multi.jar -C target .
-	echo "Main-Class: main.Main" > target/manifest
-	jar -uvfm kancolle-multi.jar target/manifest
+	cp -r ./${RESOURCE_PATH}/* ./${TARGET_PATH}/classes
+	jar cvf ./${TARGET_PATH}/${JAR_NAME} -C ./${TARGET_PATH}/classes .
+	mkdir -p ./${TARGET_PATH}/archive && echo "Main-Class: main.Main" > ./${TARGET_PATH}/archive/manifest
+	jar -uvfm ./${TARGET_PATH}/${JAR_NAME} ./${TARGET_PATH}/archive/manifest
 
 native:
 	# Work in progress; Input method still not usable with Liberica NIK
@@ -27,4 +33,4 @@ native-run:
 	./native/kcmm
 
 clean:
-	rm -r target
+	test -d ${TARGET_PATH} && rm -r ${TARGET_PATH} || true

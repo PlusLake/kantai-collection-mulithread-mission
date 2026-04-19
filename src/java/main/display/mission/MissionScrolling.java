@@ -5,10 +5,10 @@ import main.core.Mission;
 import java.util.List;
 
 public class MissionScrolling {
-    protected static int mainTranslation(int panelHeight, List<Mission> missions, int cursor) {
+    protected static int mainTranslation(int panelHeight, List<Mission> missions, List<String> tips, int cursor) {
         int result = panelHeight
                 - MissionUI.FOOTER_HEIGHT
-                - MissionUI.TIP_HEIGHT
+                - MissionUI.tipHeight(tips.size())
                 - currentMissionY(missions, cursor)
                 - missionY(missions, cursor, 1)
                 + MissionUI.STAGE_MARGIN

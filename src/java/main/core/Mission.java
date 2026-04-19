@@ -6,15 +6,23 @@ import java.util.stream.*;
 
 public class Mission {
     private final List<Stage> stages = new ArrayList<>();
+    private String id;
     private String name;
 
+    // version 1
     private Mission(String name) {
+        this("", name);
+    }
+
+    // version 2
+    private Mission(String id, String name) {
+        this.id = id;
         this.name = name;
     }
 
     public String toString() {
         String stagesString = stages.stream().map(Stage::toString).collect(Collectors.joining("_"));
-        return "%s\t%s".formatted(name, stagesString);
+        return "%s\t%s\t%s".formatted(id, name, stagesString);
     }
 
     public void computeAllStages(Predicate<Stage> filter, Consumer<Stage> callback) {
@@ -34,6 +42,14 @@ public class Mission {
         if (this.stages.isEmpty()) this.stages.add(Stage.of(1, 1));
     }
 
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getId() {
+        return id;
+    }
+
     public void setName(String name) {
         this.name = name;
     }
@@ -48,9 +64,23 @@ public class Mission {
 
     public static Mission parse(String line) {
         String[] splitted = line.split("\t");
-        Mission mission = new Mission(splitted[0]);
+        Mission mission;
+        String stages;
+        if (splitted.length == 2) {
+            // version 1
+            mission = new Mission(splitted[0]);
+            stages = splitted[1];
+        }
+        else if (splitted.length == 3) {
+            // version 2
+            mission = new Mission(splitted[0], splitted[1]);
+            stages = splitted[2];
+        }
+        else {
+            throw new IllegalArgumentException("invalid line: %s".formatted(line));
+        }
         Stream
-                .of(splitted[1].split("_"))
+                .of(stages.split("_"))
                 .map(stage -> Stream.of(stage.split("-")).map(Integer::parseInt).toArray(Integer[]::new))
                 .map(array -> Stage.of(array[0], array[1], array[2], array[3], array[4]))
                 .forEach(mission.stages::add);
@@ -62,7 +92,7 @@ public class Mission {
     }
 
     public boolean isDefaultMission() {
-        return name.equals(defaultMission().name)
+        return id.equals(defaultMission().id)
                 && stages.size() == 1
                 && stages.get(0).name().equals("1-1");
     }

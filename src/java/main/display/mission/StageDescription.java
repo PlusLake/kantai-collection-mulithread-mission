@@ -9,7 +9,7 @@ import java.util.stream.*;
 public record StageDescription(String name, String operation) {
     private static final Map<String,StageDescription> map = Log.timer("load stage", StageDescription::load);
     private static Map<String, StageDescription> load() {
-        InputStream stream = StageDescription.class.getResourceAsStream("/resource/stage.tsv");
+        InputStream stream = StageDescription.class.getResourceAsStream("/assets/stage.tsv");
         return new BufferedReader(new InputStreamReader(stream))
                 .lines()
                 .map(line -> line.split("\t"))

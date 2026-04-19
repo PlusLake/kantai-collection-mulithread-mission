@@ -11,7 +11,7 @@ public enum Fonts {
     public final Font font;
 
     Fonts(String filename) {
-        String path = "/resource/" + filename;
+        String path = "/assets/" + filename;
         font = Exceptions
                 .wrap(() -> Font.createFont(Font.TRUETYPE_FONT, Fonts.class.getResourceAsStream(path)))
                 .deriveFont(12f);
