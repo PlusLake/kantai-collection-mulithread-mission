@@ -4,6 +4,7 @@ import main.core.*;
 import main.core.Wiki.Detail;
 import main.display.*;
 import main.display.wiki.WikiSelectionUI;
+import main.external.Persistent;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,7 +26,7 @@ public class MissionUI {
     private static final Color TIP_FONT_COLOR = new Color(255, 224, 224);
 
     protected static final int PANEL_PADDING = 8;
-    private static final int MISSION_WIDTH = 150;
+    private static final int MISSION_WIDTH = 250;
     private static final int MISSION_MARGIN = 4;
     protected static final int STAGE_HEIGHT = 20;
     protected static final int STAGE_MARGIN = MISSION_MARGIN;
@@ -33,7 +34,8 @@ public class MissionUI {
     private static final int FOOTER_COUNT = 4;
     protected static final int FOOTER_HEIGHT = (STAGE_HEIGHT + STAGE_MARGIN) * FOOTER_COUNT + PANEL_PADDING * 2 - STAGE_MARGIN;
     protected static final int TOTAL_WIDTH = MISSION_WIDTH + (STAGE_WIDTH + STAGE_MARGIN) * 2;
-    protected static final int TIP_HEIGHT = 50;
+    protected static final int TIP_LINE_HEIGHT = 15;
+    protected static final int TIP_MARGIN = MISSION_MARGIN;
 
     private final List<Mission> missions = new ArrayList<>();
     private final List<Wiki> wikis = new ArrayList<>();
@@ -41,6 +43,11 @@ public class MissionUI {
     private final int[] update = {-1, -1};
     private Mode currentMode = Mode.MAIN;
     private Rectangle editingArea = null;
+    private List<String> tips = new ArrayList<>();
+
+    protected static final int tipHeight(int count) {
+        return TIP_LINE_HEIGHT * count + TIP_MARGIN;
+    }
 
     public MissionUI(List<Mission> missions, List<Wiki> wikis) {
         this.missions.addAll(missions);
@@ -57,11 +64,12 @@ public class MissionUI {
         graphics.setFont(Fonts.JAPANESE.font);
         graphics.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         Translation.execute(graphics, PANEL_PADDING, PANEL_PADDING, () -> renderMissions(graphics, size.height));
-        Translation.execute(graphics, 0, size.height - FOOTER_HEIGHT - TIP_HEIGHT, () -> renderFooter(graphics, size));
-        Translation.execute(graphics, 0, size.height - TIP_HEIGHT, () -> renderTip(graphics, size.width));
+        generateTips(tips);
+        Translation.execute(graphics, 0, size.height - tipHeight(tips.size()), () -> renderTip(graphics, size.width));
+        Translation.execute(graphics, 0, size.height - FOOTER_HEIGHT - tipHeight(tips.size()), () -> renderFooter(graphics, size));
         if (currentMode == Mode.STAGE_EDIT) {
             graphics.setColor(new Color(0, 0, 0, 128));
-            Area area = new Area(new Rectangle(0, 0, size.width, size.height - TIP_HEIGHT));
+            Area area = new Area(new Rectangle(0, 0, size.width, size.height - tipHeight(tips.size())));
             area.subtract(new Area(editingArea));
             graphics.fill(area);
         }
@@ -73,7 +81,7 @@ public class MissionUI {
     }
 
     private void renderMissions(Graphics2D graphics, int panelHeight) {
-        graphics.translate(0, MissionScrolling.mainTranslation(panelHeight, missions, cursor[0]));
+        graphics.translate(0, MissionScrolling.mainTranslation(panelHeight, missions, tips, cursor[0]));
         missions.forEach(mission -> {
             int stages = mission.getStages().size();
             int missionHeight = stages * STAGE_HEIGHT + (stages - 1) * STAGE_MARGIN;
@@ -85,7 +93,7 @@ public class MissionUI {
                 graphics.drawRect(-1, -1, MISSION_WIDTH + 1, missionHeight + 1);
             }
             graphics.setColor(FONT_COLOR);
-            graphics.drawString(mission.getName(), 8, 16);
+            graphics.drawString(String.format("(%s) %s" , mission.getId(), mission.getName()), 8, 16);
             Translation.execute(graphics, MISSION_WIDTH + STAGE_MARGIN, 0, () -> mission.getStages().forEach(stage -> {
                 boolean isCurrentStage = isCurrentMission && mission.getStages().indexOf(stage) == cursor[2];
                 renderStages(graphics, stage, isCurrentStage);
@@ -155,41 +163,35 @@ public class MissionUI {
         final int LINE_START_Y = 15;
         final int INTERVAL_X = 10;
         final int INTERVAL_Y = 15;
-        ArrayList<String> tips = new ArrayList<>(List.of(""));
         graphics.setColor(TIP_BACKGROUND_COLOR);
-        graphics.fillRect(0, 0, width, TIP_HEIGHT);
+        graphics.fillRect(0, 0, width, tips.size() * INTERVAL_Y + TIP_MARGIN);
         graphics.setColor(TIP_FONT_COLOR);
         graphics.setFont(Fonts.MONO.font);
-        generateTips(tips);
         Function<String, Integer> textWidth = graphics.getFontMetrics()::stringWidth;
         int cursor = LINE_START_X;
-        for (int i = 1, y = LINE_START_Y; i < tips.size(); i++) {
-            cursor += textWidth.apply(tips.get(i - 1)) + (i == 1 ? 0 : INTERVAL_X);
-            if (cursor + textWidth.apply(tips.get(i)) > (width - INTERVAL_X)) {
-                cursor = LINE_START_X;
-                y += INTERVAL_Y;
-            }
-            graphics.drawString(tips.get(i), cursor, y);
+        for (int i = 0; i < tips.size(); i++) {
+            graphics.drawString(tips.get(i), LINE_START_X, INTERVAL_Y * i + LINE_START_Y);
         }
     }
 
     private void generateTips(List<String> tips) {
+        tips.clear();
         Map<Integer, List<String>> main = Map.of(
                 0, List.of(
-                        "[+] Add mission",
-                        "[-] Remove selecting mission",
+                        "[+ / Page Up] Add mission",
+                        "[- / Page Down] Remove selecting mission",
                         "[Enter] Open Wiki"
                 ),
                 1, List.of(
-                        "[+] Add stage",
-                        "[-] Remove stage",
+                        "[+ / Page Up] Add stage",
+                        "[- / Page Down] Remove stage",
                         "[1-9] Edit stage code"
                 ),
                 2, List.of(
-                        "[+] Add total",
-                        "[-] Minus total",
-                        "[Ctrl +] Add count",
-                        "[Ctrl -] Minus count"
+                        "[+ / Page Up] Add total",
+                        "[- / Page Down] Minus total",
+                        "[Ctrl + / Ctrl Page Up] Add count",
+                        "[Ctrl - / Ctrl Page Down] Minus count"
                 )
         );
         if (currentMode == Mode.MAIN) {
@@ -200,8 +202,8 @@ public class MissionUI {
         if (currentMode == Mode.STAGE_CLEAR) {
             tips.add("[↑↓] Navigate");
             tips.add("[Ctrl ↑] Normal mode");
-            tips.add("[+] Add count");
-            tips.add("[-] Minus count");
+            tips.add("[+ / Page Up] Add count");
+            tips.add("[- / Page Down] Minus count");
         }
         if (currentMode == Mode.STAGE_EDIT) {
             tips.add("[Esc] Cancel");
@@ -221,12 +223,14 @@ public class MissionUI {
     }
 
     private void keyMain(int keyCode, JFrame frame) {
+        boolean addedMission = false;
         // Add missions
         if (keyCode == VK_ADD || keyCode == VK_PAGE_UP) {
             if (cursor[1] == 0) {
                 missions.add(Mission.defaultMission());
                 cursor[0] = missions.size() - 1;
                 cursor[1] = cursor[2] = 0;
+                addedMission = true;
             }
             if (cursor[1] == 1) {
                 currentMission().getStages().add(Stage.of(1, 1, 0, 1));
@@ -273,11 +277,12 @@ public class MissionUI {
         if (keyCode >= VK_NUMPAD1 && keyCode <= VK_NUMPAD9 && cursor[1] == 1) edit.accept(VK_NUMPAD0);
         if (keyCode >= VK_1 && keyCode <= VK_9 && cursor[1] == 1) edit.accept(VK_0);
         // Open wiki
-        if (keyCode == VK_ENTER && cursor[1] == 0) {
+        if (addedMission || keyCode == VK_ENTER && cursor[1] == 0) {
             Mission current = this.missions.get(this.cursor[0]);
             String search = !current.isDefaultMission() ? current.getName() : "";
             WikiSelectionUI.show(frame, wikis, search).ifPresent(wiki -> {
                 Mission mission = currentMission();
+                mission.setId(wiki.id());
                 mission.setName(wiki.name());
                 mission.replaceStages(wiki.details().stream().map(Detail::toStage).toList());
             });
@@ -287,6 +292,9 @@ public class MissionUI {
     private void keyDefaultWithControl(int keyCode) {
         if (keyCode == VK_ADD || keyCode == VK_PAGE_UP) currentStage().addCount();
         if (keyCode == VK_SUBTRACT || keyCode == VK_PAGE_DOWN) currentStage().minusCount();
+        if (keyCode == VK_ADD || keyCode == VK_PAGE_UP || keyCode == VK_SUBTRACT || keyCode == VK_PAGE_DOWN) {
+            Persistent.saveMissions(this.getMissions());
+        }
         if (keyCode == VK_DOWN) {
             currentMode = Mode.STAGE_CLEAR;
             cursor[3] = 0;
